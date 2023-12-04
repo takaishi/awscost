@@ -5,7 +5,7 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - main: main.go
+  - main: .
     binary: awscost
     ldflags:
       - -s -w
