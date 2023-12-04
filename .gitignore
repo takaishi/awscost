@@ -1,0 +1,5 @@
+local.json
+dist/*
+tmp/*
+.env
+.envrc
