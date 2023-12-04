@@ -1,4 +1,4 @@
-# aws_cost_to_slack
+# awscost
 
 ## Development
 

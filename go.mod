@@ -1,4 +1,4 @@
-module github.com/takaishi/aws_cost_to_slack
+module github.com/takaishi/awscost
 
 go 1.19
 
