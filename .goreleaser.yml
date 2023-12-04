@@ -6,7 +6,7 @@ before:
     - go mod tidy
 builds:
   - main: main.go
-    binary: ./dist/awscost
+    binary: awscost
     ldflags:
       - -s -w
       - -X main.Version={{.Version}}
