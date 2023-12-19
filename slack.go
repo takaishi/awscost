@@ -12,8 +12,8 @@ import (
 
 func postToSlack(awsConfig aws.Config, text string, graphBuf *bytes.Buffer) error {
 	cfg := &Config{}
-	token, exists := os.LookupEnv("SLACK_BOT_TOKEN")
-	if !exists {
+	_, exists := os.LookupEnv("SECRET_NAME")
+	if exists {
 		svc := secretsmanager.NewFromConfig(awsConfig)
 		param := &secretsmanager.GetSecretValueInput{
 			SecretId:     aws.String(os.Getenv("SECRET_NAME")),
@@ -30,7 +30,7 @@ func postToSlack(awsConfig aws.Config, text string, graphBuf *bytes.Buffer) erro
 			return err
 		}
 	} else {
-		cfg.SlackBotToken = token
+		cfg.SlackBotToken = os.Getenv("SLACK_BOT_TOKEN")
 		cfg.SlackChannel = os.Getenv("SLACK_CHANNEL")
 	}
 
