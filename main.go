@@ -177,7 +177,7 @@ func drawStackedBarChart(period *types.DateInterval, accounts []organizationType
 			costsByAccount[cost.AccountName] = append(costsByAccount[cost.AccountName], cost.Amount)
 		}
 	}
-	p.Y.Max = maxAmount + 10
+	p.Y.Max = maxAmount * 1.5
 	p.NominalX(nominals...)
 
 	bars := []Bar{}
