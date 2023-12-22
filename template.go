@@ -66,7 +66,9 @@ type TemplateData struct {
 }
 
 func (t TemplateData) ForecastOfCurrentMonth() string {
-	if t.Forecasts == nil {
+	if disableForecast() {
+		return ""
+	} else if t.Forecasts == nil {
 		return fmt.Sprintf("通知日は月末なので料金予測はありません")
 	} else {
 		return fmt.Sprintf("%s月の料金予測: %s USD", t.TargetForecastMonth, formatAmount(t.TotalForecasts))
@@ -110,11 +112,8 @@ func templateData(forecasts map[string]float64, costs []Cost, periodForForecasts
 	} else {
 		costsByServiceAndAccount = costs
 	}
-	periodForForecastStart, err := time.Parse("2006-01-02", *periodForForecasts.Start)
-	if err != nil {
-		return nil, err
-	}
-	return &TemplateData{
+
+	td := &TemplateData{
 		Date:                     *period.Start,
 		Total:                    total,
 		TotalForecasts:           totalForecast,
@@ -122,8 +121,15 @@ func templateData(forecasts map[string]float64, costs []Cost, periodForForecasts
 		CostsByAccount:           costsByAccount,
 		CostsByServiceAndAccount: costsByServiceAndAccount,
 		CodeFence:                "```",
-		TargetForecastMonth:      periodForForecastStart.Format("1"),
-	}, nil
+	}
+	if periodForForecasts != nil {
+		periodForForecastStart, err := time.Parse("2006-01-02", *periodForForecasts.Start)
+		if err != nil {
+			return nil, err
+		}
+		td.TargetForecastMonth = periodForForecastStart.Format("1")
+	}
+	return td, nil
 }
 
 func (t TemplateData) CostTable() string {

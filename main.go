@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	organizationTypes "github.com/aws/aws-sdk-go-v2/service/organizations/types"
@@ -65,6 +66,14 @@ func dryRun() bool {
 	return dryRun
 }
 
+func disableForecast() bool {
+	disableForecast := false
+	if os.Getenv("DISABLE_FORECAST") != "" {
+		disableForecast = os.Getenv("DISABLE_FORECAST") == "true"
+	}
+	return disableForecast
+}
+
 type Bar struct {
 	AccountName string
 	BarChart    plotter.BarChart
@@ -76,11 +85,7 @@ func handler(ev events.CloudWatchEvent) error {
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
 	}
-	forecastCalculator := NewForecastsOfCurrentMonth(&awsConfig, now)
-	forecasts, err := forecastCalculator.GetForecasts()
-	if err != nil {
-		return err
-	}
+	forecastsPeriod, forecasts, err := getForecasts(&awsConfig, now)
 
 	costCalculator := NewCostOfTwoDaysAgo(&awsConfig, now)
 	costs, err := costCalculator.GetCosts()
@@ -98,7 +103,7 @@ func handler(ev events.CloudWatchEvent) error {
 		return err
 	}
 
-	text, err := renderText(forecasts, costs, forecastCalculator.Period(), costCalculator.Period())
+	text, err := renderText(forecasts, costs, forecastsPeriod, costCalculator.Period())
 	if err != nil {
 		log.Fatalf("failed to render: %v", err)
 		return err
@@ -115,6 +120,18 @@ func handler(ev events.CloudWatchEvent) error {
 	}
 
 	return nil
+}
+
+func getForecasts(awsConfig *aws.Config, now time.Time) (*types.DateInterval, map[string]float64, error) {
+	if !disableForecast() {
+		forecastCalculator := NewForecastsOfCurrentMonth(awsConfig, now)
+		forecasts, err := forecastCalculator.GetForecasts()
+		if err != nil {
+			return nil, nil, err
+		}
+		return forecastCalculator.Period(), forecasts, nil
+	}
+	return nil, nil, nil
 }
 
 type DailyCosts struct {
