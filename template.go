@@ -12,7 +12,7 @@ import (
 )
 
 const Template = `
-{{ .Date }}の合計料金: {{ formatAmount .Total }} USD ({{ .ForecastOfCurrentMonth }})
+{{ .Date }}の合計料金: {{ formatAmount .Total }} USD {{ .ForecastOfCurrentMonth }}
 
 アカウント毎の料金:
 
@@ -69,9 +69,9 @@ func (t TemplateData) ForecastOfCurrentMonth() string {
 	if disableForecast() {
 		return ""
 	} else if t.Forecasts == nil {
-		return fmt.Sprintf("通知日は月末なので料金予測はありません")
+		return fmt.Sprintf("(通知日は月末なので料金予測はありません)")
 	} else {
-		return fmt.Sprintf("%s月の料金予測: %s USD", t.TargetForecastMonth, formatAmount(t.TotalForecasts))
+		return fmt.Sprintf("(%s月の料金予測: %s USD)", t.TargetForecastMonth, formatAmount(t.TotalForecasts))
 	}
 }
 
