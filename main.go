@@ -127,7 +127,7 @@ func getForecasts(awsConfig *aws.Config, now time.Time) (*types.DateInterval, ma
 		forecastCalculator := NewForecastsOfCurrentMonth(awsConfig, now)
 		forecasts, err := forecastCalculator.GetForecasts()
 		if err != nil {
-			return nil, nil, err
+			return forecastCalculator.Period(), forecasts, err
 		}
 		return forecastCalculator.Period(), forecasts, nil
 	}
