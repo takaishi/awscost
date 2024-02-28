@@ -10,20 +10,27 @@ import (
 )
 
 type Config struct {
-	SlackBotToken              string `json:"SLACK_BOT_TOKEN"`
-	SlackChannel               string `json:"SLACK_CHANNEL"`
-	GetCostAndUsageInputFilter *types.Expression
+	SlackBotToken        string `json:"SLACK_BOT_TOKEN"`
+	SlackChannel         string `json:"SLACK_CHANNEL"`
+	GetCostAndUsageInput *GetCostAndUsageInput
+}
+
+type GetCostAndUsageInput struct {
+	Filter *types.Expression `json:"Filter"`
 }
 
 func NewConfigFromFile(awsConfig aws.Config, path string) (*Config, error) {
 	var cfg Config
-	buf, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(buf, &cfg)
-	if err != nil {
-		return nil, err
+	fileInfo, err := os.Stat(path)
+	if fileInfo != nil && err == nil {
+		buf, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(buf, &cfg)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	_, exists := os.LookupEnv("SECRET_NAME")

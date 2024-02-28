@@ -194,8 +194,8 @@ func (c *CostGraphRenderer) GetCosts() ([]organizationTypes.Account, []DailyCost
 			},
 			NextPageToken: token,
 		}
-		if c.cfg.GetCostAndUsageInputFilter != nil {
-			params.Filter = c.cfg.GetCostAndUsageInputFilter
+		if c.cfg.GetCostAndUsageInput != nil && c.cfg.GetCostAndUsageInput.Filter != nil {
+			params.Filter = c.cfg.GetCostAndUsageInput.Filter
 		}
 		costAndUsage, err := svc.GetCostAndUsage(context.TODO(), params)
 		if err != nil {
