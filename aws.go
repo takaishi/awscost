@@ -149,12 +149,13 @@ func (f *ForecastsOfCurrentMonth) GetForecasts() (map[string]float64, error) {
 }
 
 type CostGraphRenderer struct {
+	cfg       *Config
 	awsConfig *aws.Config
 	now       time.Time
 }
 
-func NewCostGraphRenderer(awsConfig *aws.Config, now time.Time) *CostGraphRenderer {
-	return &CostGraphRenderer{awsConfig: awsConfig, now: now}
+func NewCostGraphRenderer(cfg *Config, awsConfig *aws.Config, now time.Time) *CostGraphRenderer {
+	return &CostGraphRenderer{cfg: cfg, awsConfig: awsConfig, now: now}
 }
 
 func (c *CostGraphRenderer) Period() *types.DateInterval {
@@ -192,6 +193,9 @@ func (c *CostGraphRenderer) GetCosts() ([]organizationTypes.Account, []DailyCost
 				},
 			},
 			NextPageToken: token,
+		}
+		if c.cfg.GetCostAndUsageInput != nil && c.cfg.GetCostAndUsageInput.Filter != nil {
+			params.Filter = c.cfg.GetCostAndUsageInput.Filter
 		}
 		costAndUsage, err := svc.GetCostAndUsage(context.TODO(), params)
 		if err != nil {

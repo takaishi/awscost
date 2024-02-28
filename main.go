@@ -26,11 +26,6 @@ const (
 	UnblendedCost = "UnblendedCost"
 )
 
-type Config struct {
-	SlackBotToken string `json:"SLACK_BOT_TOKEN"`
-	SlackChannel  string `json:"SLACK_CHANNEL"`
-}
-
 type Cost struct {
 	AccountId   string
 	AccountName string
@@ -48,6 +43,14 @@ func main() {
 			os.Exit(1)
 		}
 	}
+}
+
+func configPath() string {
+	path := os.Getenv("CONFIG_PATH")
+	if path == "" {
+		path = "config.json"
+	}
+	return path
 }
 
 func isLambda() bool {
@@ -85,6 +88,12 @@ func handler(ev events.CloudWatchEvent) error {
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
 	}
+
+	cfg, err := NewConfigFromFile(awsConfig, configPath())
+	if err != nil {
+		return err
+	}
+
 	forecastsPeriod, forecasts, err := getForecasts(&awsConfig, now)
 
 	costCalculator := NewCostOfTwoDaysAgo(&awsConfig, now)
@@ -93,7 +102,7 @@ func handler(ev events.CloudWatchEvent) error {
 		return err
 	}
 
-	costGraphRenderer := NewCostGraphRenderer(&awsConfig, now)
+	costGraphRenderer := NewCostGraphRenderer(cfg, &awsConfig, now)
 	accounts, costsForGraph, err := costGraphRenderer.GetCosts()
 	if err != nil {
 		return err
@@ -112,7 +121,7 @@ func handler(ev events.CloudWatchEvent) error {
 	if dryRun() {
 		fmt.Println(text)
 	} else {
-		err = postToSlack(awsConfig, text, graph)
+		err = postToSlack(cfg, text, graph)
 		if err != nil {
 			log.Fatalf("failed to post to slack: %v", err)
 			return err
