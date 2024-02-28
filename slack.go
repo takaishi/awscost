@@ -2,38 +2,10 @@ package main
 
 import (
 	"bytes"
-	"context"
-	"encoding/json"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/slack-go/slack"
-	"os"
 )
 
-func postToSlack(awsConfig aws.Config, text string, graphBuf *bytes.Buffer) error {
-	cfg := &Config{}
-	_, exists := os.LookupEnv("SECRET_NAME")
-	if exists {
-		svc := secretsmanager.NewFromConfig(awsConfig)
-		param := &secretsmanager.GetSecretValueInput{
-			SecretId:     aws.String(os.Getenv("SECRET_NAME")),
-			VersionStage: aws.String("AWSCURRENT"),
-		}
-		result, err := svc.GetSecretValue(context.TODO(), param)
-		if err != nil {
-			return err
-		}
-
-		var secretString = *result.SecretString
-		err = json.Unmarshal([]byte(secretString), cfg)
-		if err != nil {
-			return err
-		}
-	} else {
-		cfg.SlackBotToken = os.Getenv("SLACK_BOT_TOKEN")
-		cfg.SlackChannel = os.Getenv("SLACK_CHANNEL")
-	}
-
+func postToSlack(cfg *Config, text string, graphBuf *bytes.Buffer) error {
 	api := slack.New(cfg.SlackBotToken)
 
 	if !dryRun() {
