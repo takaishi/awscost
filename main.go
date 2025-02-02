@@ -191,12 +191,14 @@ func drawStackedBarChart(period *types.DateInterval, accounts []organizationType
 
 	bars := []Bar{}
 	for _, account := range accounts {
-		bar, err := plotter.NewBarChart(costsByAccount[*account.Name], vg.Points(5))
-		if err != nil {
-			return nil, err
+		if costsByAccount[*account.Name] != nil && costsByAccount[*account.Name].Len() > 0 {
+			bar, err := plotter.NewBarChart(costsByAccount[*account.Name], vg.Points(5))
+			if err != nil {
+				return nil, err
+			}
+			bar.LineStyle.Width = vg.Length(0)
+			bars = append(bars, Bar{*account.Name, *bar})
 		}
-		bar.LineStyle.Width = vg.Length(0)
-		bars = append(bars, Bar{*account.Name, *bar})
 	}
 
 	// Sort by the last value (amount) of the bar chart
