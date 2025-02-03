@@ -16,9 +16,11 @@ import (
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 	"gonum.org/v1/plot/vg/vgimg"
+	"image/color"
 	"log"
 	"os"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -107,7 +109,11 @@ func handler(ev events.CloudWatchEvent) error {
 	if err != nil {
 		return err
 	}
-	graph, err := drawStackedBarChart(costGraphRenderer.Period(), accounts, costsForGraph)
+	colors, err := generateColors(cfg.Colors)
+	if err != nil {
+		return err
+	}
+	graph, err := drawStackedBarChart(costGraphRenderer.Period(), accounts, costsForGraph, colors)
 	if err != nil {
 		return err
 	}
@@ -148,7 +154,7 @@ type DailyCosts struct {
 	Costs []Cost
 }
 
-func drawStackedBarChart(period *types.DateInterval, accounts []organizationTypes.Account, dailyCosts []DailyCosts) (*bytes.Buffer, error) {
+func drawStackedBarChart(period *types.DateInterval, accounts []organizationTypes.Account, dailyCosts []DailyCosts, colors []color.Color) (*bytes.Buffer, error) {
 	p := plot.New()
 	p.Title.Text = "AWS Daily Costs (3 months)"
 	p.Y.Label.Text = "Costs (USD)"
@@ -157,8 +163,6 @@ func drawStackedBarChart(period *types.DateInterval, accounts []organizationType
 	p.Legend.Left = false
 	p.Legend.XOffs = 200
 	p.Add(plotter.NewGrid())
-
-	colors := append(plotutil.SoftColors, plotutil.DarkColors...)
 
 	maxAmount := 0.0
 	nominals := []string{}
@@ -249,4 +253,34 @@ func drawStackedBarChart(period *types.DateInterval, accounts []organizationType
 		}
 		return buffer, nil
 	}
+}
+
+func generateColors(colorConfig []string) ([]color.Color, error) {
+	colors := []color.Color{}
+
+	if colorConfig == nil {
+		return append(plotutil.SoftColors, plotutil.DarkColors...), nil
+	}
+
+	for _, hex := range colorConfig {
+		if len(hex) != 7 || hex[0] != '#' {
+			return nil, fmt.Errorf("invalid hex color format")
+		}
+		r, err := strconv.ParseUint(hex[1:3], 16, 8)
+		if err != nil {
+			return nil, err
+		}
+
+		g, err := strconv.ParseUint(hex[3:5], 16, 8)
+		if err != nil {
+			return nil, err
+		}
+
+		b, err := strconv.ParseUint(hex[5:7], 16, 8)
+		if err != nil {
+			return nil, err
+		}
+		colors = append(colors, color.RGBA{uint8(r), uint8(g), uint8(b), 255})
+	}
+	return colors, nil
 }

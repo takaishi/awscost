@@ -135,7 +135,7 @@ func (f *ForecastsOfCurrentMonth) GetForecasts() (map[string]float64, error) {
 		}
 		costForecast, err := configSvc.GetCostForecast(context.TODO(), params)
 		if err != nil {
-			fmt.Printf("unable to get cost forecast for %s, %v", *account.Id, err)
+			fmt.Printf("unable to get cost forecast for %s, %v\n", *account.Id, err)
 		}
 		if costForecast != nil {
 			amount, err := strconv.ParseFloat(*costForecast.Total.Amount, 64)
