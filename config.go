@@ -13,6 +13,7 @@ type Config struct {
 	SlackBotToken        string `json:"SLACK_BOT_TOKEN"`
 	SlackChannel         string `json:"SLACK_CHANNEL"`
 	GetCostAndUsageInput *GetCostAndUsageInput
+	Colors               []string
 }
 
 type GetCostAndUsageInput struct {
