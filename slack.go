@@ -18,12 +18,13 @@ func postToSlack(cfg *Config, text string, graphBuf *bytes.Buffer) error {
 			opts...,
 		)
 
-		_, err = api.UploadFile(
-			slack.FileUploadParameters{
+		_, err = api.UploadFileV2(
+			slack.UploadFileV2Parameters{
 				Reader:         graphBuf,
+				FileSize:       graphBuf.Len(),
 				Filename:       "daily_costs.png",
 				InitialComment: "アカウント別の日次料金(90日分)",
-				Channels:       []string{cfg.SlackChannelId},
+				Channel:        cfg.SlackChannelId,
 			})
 		if err != nil {
 			return err
