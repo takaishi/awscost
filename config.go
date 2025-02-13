@@ -11,7 +11,7 @@ import (
 
 type Config struct {
 	SlackBotToken        string `json:"SLACK_BOT_TOKEN"`
-	SlackChannel         string `json:"SLACK_CHANNEL"`
+	SlackChannelId       string `json:"SLACK_CHANNEL"`
 	GetCostAndUsageInput *GetCostAndUsageInput
 	Colors               []string
 }
@@ -53,7 +53,7 @@ func NewConfigFromFile(awsConfig aws.Config, path string) (*Config, error) {
 		}
 	} else {
 		cfg.SlackBotToken = os.Getenv("SLACK_BOT_TOKEN")
-		cfg.SlackChannel = os.Getenv("SLACK_CHANNEL")
+		cfg.SlackChannelId = os.Getenv("SLACK_CHANNEL")
 	}
 
 	return &cfg, nil
