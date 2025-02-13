@@ -13,6 +13,16 @@ builds:
       - -X main.Revision={{.ShortCommit}}
     env:
       - CGO_ENABLED=0
+    ignore:
+      - goos: windows
+        goarch: 386
+      - goos: darwin
+        goarch: 386
+      - goos: linux
+        goarch: 386
+      - goos: linux
+        goarch: arm
+        goarm: 7
 archives:
   - id: build
     name_template: >-
