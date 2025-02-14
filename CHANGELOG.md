@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.0.7](https://github.com/takaishi/awscost/compare/v0.0.6...v0.0.7) - 2025-02-14
+- chore: remove old workflow by @takaishi in https://github.com/takaishi/awscost/pull/21
+- fix: plotter: no data points by @takaishi in https://github.com/takaishi/awscost/pull/14
+- feat: support parameter store by @takaishi in https://github.com/takaishi/awscost/pull/23
+
 ## [v0.0.6](https://github.com/takaishi/awscost/compare/v0.0.5...v0.0.6) - 2025-02-13
 - fix: base branch by @takaishi in https://github.com/takaishi/awscost/pull/17
 - chore: clear type of slack channel variable by @takaishi in https://github.com/takaishi/awscost/pull/18
