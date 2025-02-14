@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"os"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
-	"os"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )
 
 type Config struct {
@@ -34,8 +36,7 @@ func NewConfigFromFile(awsConfig aws.Config, path string) (*Config, error) {
 		}
 	}
 
-	_, exists := os.LookupEnv("SECRET_NAME")
-	if exists {
+	if _, exists := os.LookupEnv("SECRET_NAME"); exists {
 		svc := secretsmanager.NewFromConfig(awsConfig)
 		param := &secretsmanager.GetSecretValueInput{
 			SecretId:     aws.String(os.Getenv("SECRET_NAME")),
@@ -51,8 +52,39 @@ func NewConfigFromFile(awsConfig aws.Config, path string) (*Config, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else {
+	}
+
+	if _, exists := os.LookupEnv("SLACK_BOT_TOKEN_PARAMETER_NAME"); exists {
+		svc := ssm.NewFromConfig(awsConfig)
+		param := &ssm.GetParameterInput{
+			Name:           aws.String(os.Getenv("SLACK_BOT_TOKEN_PARAMETER_NAME")),
+			WithDecryption: aws.Bool(true),
+		}
+		result, err := svc.GetParameter(context.TODO(), param)
+		if err != nil {
+			return nil, err
+		}
+		cfg.SlackBotToken = *result.Parameter.Value
+	}
+
+	if _, exists := os.LookupEnv("SLACK_CHANNEL_PARAMETER_NAME"); exists {
+		svc := ssm.NewFromConfig(awsConfig)
+		param := &ssm.GetParameterInput{
+			Name:           aws.String(os.Getenv("SLACK_CHANNEL_PARAMETER_NAME")),
+			WithDecryption: aws.Bool(true),
+		}
+		result, err := svc.GetParameter(context.TODO(), param)
+		if err != nil {
+			return nil, err
+		}
+		cfg.SlackChannelId = *result.Parameter.Value
+	}
+
+	if _, exists := os.LookupEnv("SLACK_BOT_TOKEN"); exists {
 		cfg.SlackBotToken = os.Getenv("SLACK_BOT_TOKEN")
+	}
+
+	if _, exists := os.LookupEnv("SLACK_CHANNEL"); exists {
 		cfg.SlackChannelId = os.Getenv("SLACK_CHANNEL")
 	}
 
