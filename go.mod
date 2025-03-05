@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.25.1
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.56.12
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/slack-go/slack v0.12.3
+	github.com/slack-go/slack v0.16.0
 	gonum.org/v1/plot v0.14.0
 )
 
