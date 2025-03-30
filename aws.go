@@ -2,14 +2,16 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
+	"strconv"
+	"sync"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	organizationTypes "github.com/aws/aws-sdk-go-v2/service/organizations/types"
-	"strconv"
-	"time"
 )
 
 type CostOfTwoDaysAgo struct {
@@ -121,29 +123,59 @@ func (f *ForecastsOfCurrentMonth) GetForecasts() (map[string]float64, error) {
 		return nil, err
 	}
 
+	var wg sync.WaitGroup
+	forecastsChan := make(chan struct {
+		name   string
+		amount float64
+	}, len(accounts))
+	errChan := make(chan error, len(accounts))
+
 	for _, account := range accounts {
-		params := &costexplorer.GetCostForecastInput{
-			Granularity: types.GranularityMonthly,
-			Metric:      "UNBLENDED_COST",
-			TimePeriod:  period,
-			Filter: &types.Expression{
-				Dimensions: &types.DimensionValues{
-					Key:    "LINKED_ACCOUNT",
-					Values: []string{*account.Id},
+		wg.Add(1)
+		go func(account organizationTypes.Account) {
+			defer wg.Done()
+			params := &costexplorer.GetCostForecastInput{
+				Granularity: types.GranularityMonthly,
+				Metric:      "UNBLENDED_COST",
+				TimePeriod:  period,
+				Filter: &types.Expression{
+					Dimensions: &types.DimensionValues{
+						Key:    "LINKED_ACCOUNT",
+						Values: []string{*account.Id},
+					},
 				},
-			},
-		}
-		costForecast, err := configSvc.GetCostForecast(context.TODO(), params)
-		if err != nil {
-			fmt.Printf("unable to get cost forecast for %s, %v\n", *account.Id, err)
-		}
-		if costForecast != nil {
-			amount, err := strconv.ParseFloat(*costForecast.Total.Amount, 64)
-			if err != nil {
-				return nil, err
 			}
-			forecasts[*account.Name] = amount
-		}
+			costForecast, err := configSvc.GetCostForecast(context.TODO(), params)
+			if err != nil {
+				slog.Error("unable to get cost forecast for %s, %v\n", *account.Id, err)
+				return
+			}
+			if costForecast != nil {
+				amount, err := strconv.ParseFloat(*costForecast.Total.Amount, 64)
+				if err != nil {
+					errChan <- err
+					return
+				}
+				forecastsChan <- struct {
+					name   string
+					amount float64
+				}{*account.Name, amount}
+			}
+		}(account)
+	}
+
+	go func() {
+		wg.Wait()
+		close(forecastsChan)
+		close(errChan)
+	}()
+
+	if err := <-errChan; err != nil {
+		return nil, err
+	}
+
+	for forecast := range forecastsChan {
+		forecasts[forecast.name] = forecast.amount
 	}
 	return forecasts, nil
 }
