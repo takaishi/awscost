@@ -4,6 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"image/color"
+	"log"
+	"log/slog"
+	"os"
+	"sort"
+	"strconv"
+	"time"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -16,12 +24,6 @@ import (
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 	"gonum.org/v1/plot/vg/vgimg"
-	"image/color"
-	"log"
-	"os"
-	"sort"
-	"strconv"
-	"time"
 )
 
 const (
@@ -36,12 +38,34 @@ type Cost struct {
 	TimePeriod  string
 }
 
+func getLogLevel() slog.Level {
+	level := os.Getenv("LOG_LEVEL")
+	switch level {
+	case "DEBUG":
+		return slog.LevelDebug
+	case "INFO":
+		return slog.LevelInfo
+	case "WARN":
+		return slog.LevelWarn
+	case "ERROR":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo // デフォルトはINFO
+	}
+}
+
 func main() {
+	// ロガーの初期化
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: getLogLevel(),
+	}))
+	slog.SetDefault(logger)
+
 	if isLambda() {
 		lambda.Start(handler)
 	} else {
 		if err := handler(events.CloudWatchEvent{}); err != nil {
-			log.Printf("failed to execute handler: %v", err)
+			logger.Error("failed to execute handler", "error", err)
 			os.Exit(1)
 		}
 	}
@@ -85,25 +109,44 @@ type Bar struct {
 }
 
 func handler(ev events.CloudWatchEvent) error {
+	handlerStart := time.Now()
+
 	now := time.Now()
+	slog.Debug("loading AWS config")
+	configStart := time.Now()
 	awsConfig, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(os.Getenv("AWS_REGION")))
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
 	}
+	slog.Debug("AWS config loaded", "duration", time.Since(configStart))
 
+	slog.Debug("loading application config")
+	cfgStart := time.Now()
 	cfg, err := NewConfigFromFile(awsConfig, configPath())
 	if err != nil {
 		return err
 	}
+	slog.Debug("application config loaded", "duration", time.Since(cfgStart))
 
+	slog.Debug("getting forecasts")
+	forecastStart := time.Now()
 	forecastsPeriod, forecasts, err := getForecasts(&awsConfig, now)
+	if err != nil {
+		slog.Error("failed to get forecasts", "error", err)
+	}
+	slog.Debug("forecasts completed", "duration", time.Since(forecastStart))
 
+	slog.Debug("calculating costs")
+	costsStart := time.Now()
 	costCalculator := NewCostOfTwoDaysAgo(&awsConfig, now)
 	costs, err := costCalculator.GetCosts()
 	if err != nil {
 		return err
 	}
+	slog.Debug("costs calculation completed", "duration", time.Since(costsStart))
 
+	slog.Debug("rendering cost graph")
+	graphStart := time.Now()
 	costGraphRenderer := NewCostGraphRenderer(cfg, &awsConfig, now)
 	accounts, costsForGraph, err := costGraphRenderer.GetCosts()
 	if err != nil {
@@ -117,23 +160,31 @@ func handler(ev events.CloudWatchEvent) error {
 	if err != nil {
 		return err
 	}
+	slog.Debug("cost graph rendering completed", "duration", time.Since(graphStart))
 
+	slog.Debug("rendering text")
+	textStart := time.Now()
 	text, err := renderText(forecasts, costs, forecastsPeriod, costCalculator.Period())
 	if err != nil {
 		log.Fatalf("failed to render: %v", err)
 		return err
 	}
+	slog.Debug("text rendering completed", "duration", time.Since(textStart))
 
 	if dryRun() {
 		fmt.Println(text)
 	} else {
+		slog.Debug("posting to Slack")
+		slackStart := time.Now()
 		err = postToSlack(cfg, text, graph)
 		if err != nil {
 			log.Fatalf("failed to post to slack: %v", err)
 			return err
 		}
+		slog.Debug("Slack posting completed", "duration", time.Since(slackStart))
 	}
 
+	slog.Info("handler completed", "total_duration", time.Since(handlerStart))
 	return nil
 }
 
