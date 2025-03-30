@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.0.8](https://github.com/takaishi/awscost/compare/v0.0.7...v0.0.8) - 2025-03-30
+- add debug log by @takaishi in https://github.com/takaishi/awscost/pull/25
+- Refactor cost forecast retrieval to use goroutines for concurrent processing and replace fmt with slog for logging errors. by @takaishi in https://github.com/takaishi/awscost/pull/27
+- chore(deps): update dependency go to v1.24.1 by @renovate in https://github.com/takaishi/awscost/pull/24
+- enable pinact and fix action's version by @takaishi in https://github.com/takaishi/awscost/pull/28
+
 ## [v0.0.7](https://github.com/takaishi/awscost/compare/v0.0.6...v0.0.7) - 2025-02-14
 - chore: remove old workflow by @takaishi in https://github.com/takaishi/awscost/pull/21
 - fix: plotter: no data points by @takaishi in https://github.com/takaishi/awscost/pull/14
