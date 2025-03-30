@@ -2,7 +2,7 @@ module github.com/takaishi/awscost
 
 go 1.21
 
-toolchain go1.23.4
+toolchain go1.24.1
 
 require (
 	github.com/aws/aws-lambda-go v1.41.0
