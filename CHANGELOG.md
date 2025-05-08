@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.9](https://github.com/takaishi/awscost/compare/v0.0.8...v0.0.9) - 2025-05-08
+- feat: support to override parameter to render graph by @takaishi in https://github.com/takaishi/awscost/pull/32
+
 ## [v0.0.8](https://github.com/takaishi/awscost/compare/v0.0.7...v0.0.8) - 2025-03-30
 - add debug log by @takaishi in https://github.com/takaishi/awscost/pull/25
 - Refactor cost forecast retrieval to use goroutines for concurrent processing and replace fmt with slog for logging errors. by @takaishi in https://github.com/takaishi/awscost/pull/27
