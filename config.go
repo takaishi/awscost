@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
@@ -14,7 +15,7 @@ import (
 type Config struct {
 	SlackBotToken        string `json:"SLACK_BOT_TOKEN"`
 	SlackChannelId       string `json:"SLACK_CHANNEL"`
-	GetCostAndUsageInput *GetCostAndUsageInput
+	GetCostAndUsageInput *costexplorer.GetCostAndUsageInput
 	Colors               []string
 }
 

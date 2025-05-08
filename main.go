@@ -120,7 +120,7 @@ func handler(ev events.CloudWatchEvent) error {
 	}
 	slog.Debug("AWS config loaded", "duration", time.Since(configStart))
 
-	slog.Debug("loading application config")
+	slog.Debug("loading application config", "path", configPath())
 	cfgStart := time.Now()
 	cfg, err := NewConfigFromFile(awsConfig, configPath())
 	if err != nil {

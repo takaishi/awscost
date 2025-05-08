@@ -204,32 +204,11 @@ func (c *CostGraphRenderer) GetCosts() ([]organizationTypes.Account, []DailyCost
 	results := []types.ResultByTime{}
 	dimensionValueAttributes := []types.DimensionValuesWithAttributes{}
 	var token *string
+	input := c.getCostAndUsageInput()
 
 	for {
-		params := &costexplorer.GetCostAndUsageInput{
-			Metrics:     []string{UnblendedCost},
-			TimePeriod:  c.Period(),
-			Granularity: types.GranularityDaily,
-			Filter: &types.Expression{
-				Not: &types.Expression{
-					Dimensions: &types.DimensionValues{
-						Key:    types.DimensionService,
-						Values: []string{"Tax"},
-					},
-				},
-			},
-			GroupBy: []types.GroupDefinition{
-				{
-					Type: types.GroupDefinitionTypeDimension,
-					Key:  aws.String("LINKED_ACCOUNT"),
-				},
-			},
-			NextPageToken: token,
-		}
-		if c.cfg.GetCostAndUsageInput != nil && c.cfg.GetCostAndUsageInput.Filter != nil {
-			params.Filter = c.cfg.GetCostAndUsageInput.Filter
-		}
-		costAndUsage, err := svc.GetCostAndUsage(context.TODO(), params)
+		input.NextPageToken = token
+		costAndUsage, err := svc.GetCostAndUsage(context.TODO(), input)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -266,6 +245,7 @@ func (c *CostGraphRenderer) transformToCosts(dimensionValueAttributes []types.Di
 	for _, value := range dimensionValueAttributes {
 		linkedAccounts[*value.Value] = value.Attributes["description"]
 	}
+	input := c.getCostAndUsageInput()
 
 	costs := []DailyCosts{}
 	for _, value := range results {
@@ -276,14 +256,56 @@ func (c *CostGraphRenderer) transformToCosts(dimensionValueAttributes []types.Di
 		c := DailyCosts{Date: &parsed, Costs: []Cost{}}
 		for _, group := range value.Groups {
 			accountName := linkedAccounts[group.Keys[0]]
-			amount, err := strconv.ParseFloat(*group.Metrics["UnblendedCost"].Amount, 64)
-			if err != nil {
-				return nil, err
+			for _, metric := range input.Metrics {
+				amount, err := strconv.ParseFloat(*group.Metrics[metric].Amount, 64)
+				if err != nil {
+					return nil, err
+				}
+				c.Costs = append(c.Costs, Cost{AccountName: accountName, Amount: amount})
 			}
-			c.Costs = append(c.Costs, Cost{AccountName: accountName, Amount: amount})
 		}
 		costs = append(costs, c)
 	}
 
 	return costs, nil
+}
+
+func (c *CostGraphRenderer) getCostAndUsageInput() *costexplorer.GetCostAndUsageInput {
+	defaultInput := &costexplorer.GetCostAndUsageInput{
+		Metrics:     []string{UnblendedCost},
+		TimePeriod:  c.Period(),
+		Granularity: types.GranularityDaily,
+		Filter: &types.Expression{
+			Not: &types.Expression{
+				Dimensions: &types.DimensionValues{
+					Key:    types.DimensionService,
+					Values: []string{"Tax"},
+				},
+			},
+		},
+		GroupBy: []types.GroupDefinition{
+			{
+				Type: types.GroupDefinitionTypeDimension,
+				Key:  aws.String("LINKED_ACCOUNT"),
+			},
+		},
+	}
+	if c.cfg.GetCostAndUsageInput != nil {
+		if c.cfg.GetCostAndUsageInput.Metrics != nil {
+			defaultInput.Metrics = c.cfg.GetCostAndUsageInput.Metrics
+		}
+		if c.cfg.GetCostAndUsageInput.TimePeriod != nil {
+			defaultInput.TimePeriod = c.cfg.GetCostAndUsageInput.TimePeriod
+		}
+		if c.cfg.GetCostAndUsageInput.Granularity != "" {
+			defaultInput.Granularity = c.cfg.GetCostAndUsageInput.Granularity
+		}
+		if c.cfg.GetCostAndUsageInput.Filter != nil {
+			defaultInput.Filter = c.cfg.GetCostAndUsageInput.Filter
+		}
+		if c.cfg.GetCostAndUsageInput.GroupBy != nil {
+			defaultInput.GroupBy = c.cfg.GetCostAndUsageInput.GroupBy
+		}
+	}
+	return defaultInput
 }
