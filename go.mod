@@ -1,17 +1,17 @@
 module github.com/takaishi/awscost
 
-go 1.21
+go 1.22
 
 toolchain go1.24.1
 
 require (
 	github.com/aws/aws-lambda-go v1.41.0
-	github.com/aws/aws-sdk-go-v2 v1.36.1
-	github.com/aws/aws-sdk-go-v2/config v1.25.10
-	github.com/aws/aws-sdk-go-v2/service/costexplorer v1.33.1
-	github.com/aws/aws-sdk-go-v2/service/organizations v1.23.1
-	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.25.1
-	github.com/aws/aws-sdk-go-v2/service/ssm v1.56.12
+	github.com/aws/aws-sdk-go-v2 v1.36.3
+	github.com/aws/aws-sdk-go-v2/config v1.29.15
+	github.com/aws/aws-sdk-go-v2/service/costexplorer v1.50.0
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.38.3
+	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.35.5
+	github.com/aws/aws-sdk-go-v2/service/ssm v1.59.1
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/slack-go/slack v0.12.3
 	gonum.org/v1/plot v0.14.0
@@ -20,16 +20,16 @@ require (
 require (
 	git.sr.ht/~sbinet/gg v0.5.0 // indirect
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.16.8 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.8 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.32 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.32 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.7.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.18.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.21.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.26.1 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.68 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.15 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.25.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.33.20 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/campoy/embedmd v1.0.0 // indirect
 	github.com/go-fonts/liberation v0.3.1 // indirect
