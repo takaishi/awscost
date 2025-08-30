@@ -1,6 +1,6 @@
 module github.com/takaishi/awscost
 
-go 1.22
+go 1.23.0
 
 toolchain go1.24.1
 
@@ -14,11 +14,14 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.64.1
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/slack-go/slack v0.12.3
-	gonum.org/v1/plot v0.14.0
+	gonum.org/v1/plot v0.16.0
 )
 
 require (
-	git.sr.ht/~sbinet/gg v0.5.0 // indirect
+	codeberg.org/go-fonts/liberation v0.5.0 // indirect
+	codeberg.org/go-latex/latex v0.1.0 // indirect
+	codeberg.org/go-pdf/fpdf v0.10.0 // indirect
+	git.sr.ht/~sbinet/gg v0.6.0 // indirect
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.18.8 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.5 // indirect
@@ -40,7 +43,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	golang.org/x/image v0.11.0 // indirect
+	golang.org/x/image v0.25.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 )
