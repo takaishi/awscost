@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.0.10](https://github.com/takaishi/awscost/compare/v0.0.9...v0.0.10) - 2025-08-30
+- fix(deps): update aws-sdk-go-v2 monorepo by @renovate[bot] in https://github.com/takaishi/awscost/pull/2
+- chore(deps): update actions/setup-go action to v5.5.0 by @renovate[bot] in https://github.com/takaishi/awscost/pull/7
+- chore(deps): update suzuki-shunsuke/pinact-action action to v0.2.2 by @renovate[bot] in https://github.com/takaishi/awscost/pull/29
+- chore(deps): update songmu/tagpr action to v1.7.0 by @renovate[bot] in https://github.com/takaishi/awscost/pull/34
+- fix(deps): update aws-sdk-go-v2 monorepo by @renovate[bot] in https://github.com/takaishi/awscost/pull/37
+- chore(deps): update dependency go to v1.25.0 by @renovate[bot] in https://github.com/takaishi/awscost/pull/31
+
 ## [v0.0.9](https://github.com/takaishi/awscost/compare/v0.0.8...v0.0.9) - 2025-05-08
 - feat: support to override parameter to render graph by @takaishi in https://github.com/takaishi/awscost/pull/32
 
