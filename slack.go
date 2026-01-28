@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"fmt"
+
 	"github.com/slack-go/slack"
 )
 
@@ -9,28 +11,19 @@ func postToSlack(cfg *Config, text string, graphBuf *bytes.Buffer) error {
 	api := slack.New(cfg.SlackBotToken)
 
 	if !dryRun() {
-		opts := []slack.MsgOption{
-			slack.MsgOptionText(text, false),
-		}
-
-		_, _, err := api.PostMessage(
-			cfg.SlackChannelId,
-			opts...,
-		)
-
-		_, err = api.UploadFileV2(
+		_, err := api.UploadFileV2(
 			slack.UploadFileV2Parameters{
-				Reader:         graphBuf,
+				Reader:         bytes.NewReader(graphBuf.Bytes()),
 				FileSize:       graphBuf.Len(),
 				Filename:       "daily_costs.png",
-				InitialComment: "アカウント別の日次料金(90日分)",
 				Channel:        cfg.SlackChannelId,
+				InitialComment: text,
 			})
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to upload file: %w", err)
 		}
 
-		return err
+		return nil
 	}
 	return nil
 }
